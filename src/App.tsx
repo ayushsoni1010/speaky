@@ -8,20 +8,22 @@ import { fetchContent, parseContentIntoSentences } from "./lib/content";
 
 function App() {
   const [sentences, setSentences] = useState<Array<string>>([]);
-  const { currentSentenceIdx, currentWordRange, playbackState, play, pause } =
+  const { play, pause, currentWordIndex, currentSentenceIndex, playingState } =
     useSpeech(sentences);
 
   const getParseResult = async () => {
-    const string = await fetchContent();
-    const parsedContent = await parseContentIntoSentences(string);
-    setSentences(parsedContent!);
+    try {
+      const string = await fetchContent();
+      const parsedContent = await parseContentIntoSentences(string);
+      setSentences(parsedContent!);
+    } catch (error) {
+      console.error("Error fetching or parsing content:", error);
+    }
   };
 
   useEffect(() => {
     getParseResult();
   }, []);
-
-  // I am able to get the parsed sentences from the data and crafted the useSpeach hook through consoles, but there are some local console issues that I can fit it if i had some more time to handle them.
 
   return (
     <div className="App">
@@ -29,17 +31,12 @@ function App() {
       <div>
         <CurrentlyReading
           sentences={sentences}
-          currentWordRange={currentWordRange}
-          currentSentenceIdx={currentSentenceIdx}
+          currentWordRange={currentWordIndex}
+          currentSentenceIdx={0}
         />
       </div>
       <div>
-        <Controls
-          play={play}
-          pause={pause}
-          loadNewContent={getParseResult}
-          state={playbackState}
-        />
+        <Controls play={play} pause={pause} loadNewContent={getParseResult} />
       </div>
     </div>
   );
