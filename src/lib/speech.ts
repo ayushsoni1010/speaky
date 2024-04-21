@@ -1,10 +1,10 @@
+export type PlayingState = "initialized" | "playing" | "paused" | "ended";
+
 export type SpeechEngineOptions = {
   onBoundary: (e: SpeechSynthesisEvent) => void;
   onEnd: (e: SpeechSynthesisEvent) => void;
   onStateUpdate: (state: PlayingState) => void;
 };
-
-export type PlayingState = "initialized" | "playing" | "paused" | "ended";
 
 export type SpeechEngineState = {
   utterance: SpeechSynthesisUtterance | null;
@@ -22,6 +22,7 @@ export type SpeechEngine = ReturnType<typeof createSpeechEngine>;
  * This should generally be left for the candidate to use as the speech synthesis apis have a few nuances
  * that the candidate might not be familiar with.
  */
+
 const createSpeechEngine = (options: SpeechEngineOptions) => {
   const state: SpeechEngineState = {
     utterance: null,
@@ -41,23 +42,26 @@ const createSpeechEngine = (options: SpeechEngineOptions) => {
     utterance.rate = state.config.rate;
     utterance.volume = state.config.volume;
     utterance.voice = state.config.voice;
-    // set up listeners
+
+    // <---- Set up listeners ---->
     utterance.onboundary = (e) => options.onBoundary(e);
     utterance.onend = (e) => {
       options.onStateUpdate("ended");
       options.onEnd(e);
     };
 
-    // set it up as active utterance
+    // <---- Set it up as active utterance and listener ---->
     state.utterance = utterance;
   };
 
   const play = () => {
     if (!state.utterance) throw new Error("No active utterance found to play");
-    state.utterance.onstart = () => {
-      console.log("waiting for onstart");
+
+    state.utterance.onstart = (e) => {
+      console.log("waiting for onstart", e);
       options.onStateUpdate("playing");
     };
+
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(state.utterance);
   };
@@ -66,6 +70,7 @@ const createSpeechEngine = (options: SpeechEngineOptions) => {
     options.onStateUpdate("paused");
     window.speechSynthesis.pause();
   };
+
   const cancel = () => {
     options.onStateUpdate("initialized");
     window.speechSynthesis.cancel();
@@ -73,10 +78,10 @@ const createSpeechEngine = (options: SpeechEngineOptions) => {
 
   return {
     state,
+    load,
     play,
     pause,
     cancel,
-    load,
   };
 };
 
