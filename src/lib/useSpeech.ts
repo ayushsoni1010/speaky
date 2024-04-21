@@ -1,55 +1,70 @@
-import { useState } from "react";
-
+import { useEffect, useRef, useState } from "react";
 import { createSpeechEngine, PlayingState, SpeechEngine } from "./speech";
 
 /*
-  @description
+  @descriptiond
   Implement a custom useSpeech hook that uses a speech engine defined in 'speech.ts'
   to play the sentences that have been fetched and parsed previously.
   
   This hook should return react friendly controls for playing, and pausing audio as well as provide information about
   the currently read word and sentence
 */
+
 const useSpeech = (sentences: Array<string>) => {
-  const [currentSentenceIdx, setCurrentSentenceIdx] = useState(0);
-  const [currentWordRange, setCurrentWordRange] = useState([0, 0]);
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
+  const [playingState, setPlayingState] = useState<PlayingState>("ended");
+  const speechEngineRef = useRef<SpeechEngine | null>(null);
 
-  const [playbackState, setPlaybackState] = useState<PlayingState>("paused");
+  useEffect(() => {
+    const options = {
+      onBoundary: (e: SpeechSynthesisEvent) => {
+        if (e.name === "word" && e.charIndex === currentWordIndex + 1) {
+          setCurrentWordIndex(currentWordIndex + 1);
+        } else if (
+          e.name === "sentence" &&
+          currentSentenceIndex < sentences.length - 1
+        ) {
+          setCurrentWordIndex(0);
+          setCurrentSentenceIndex(currentSentenceIndex + 1);
+        }
+      },
+      onEnd: (e: SpeechSynthesisEvent) => {
+        setPlayingState("ended");
+      },
+      onStateUpdate: (state: PlayingState) => {
+        setPlayingState(state);
+      },
+    };
 
-  const [speechEngine, setSpeechEngine] = useState<SpeechEngine | null>(null);
+    speechEngineRef.current = createSpeechEngine(options);
 
-  const options = {
-    onBoundary: () => {},
-    onEnd: () => {},
-    onStateUpdate: () => {},
-  };
-
-  useState(() => {
-    const engine = createSpeechEngine(options);
-    setSpeechEngine(engine);
-  });
+    return () => {
+      if (speechEngineRef.current) {
+        speechEngineRef.current?.pause();
+      }
+    };
+  }, [currentSentenceIndex, currentWordIndex, sentences]);
 
   const play = () => {
-    if (!speechEngine) return;
-
-    speechEngine.load(sentences[currentSentenceIdx]);
-    speechEngine.play();
-    setPlaybackState("playing");
+    if (!speechEngineRef.current) return;
+    speechEngineRef.current?.load(sentences.join(" "));
+    speechEngineRef.current?.play();
+    setPlayingState("paused");
   };
 
   const pause = () => {
-    if (!speechEngine) return;
-
-    speechEngine.pause();
-    setPlaybackState("paused");
+    if (!speechEngineRef.current) return;
+    speechEngineRef.current?.pause();
+    setPlayingState("paused");
   };
 
   return {
-    currentSentenceIdx,
-    currentWordRange,
-    playbackState,
     play,
     pause,
+    currentWordIndex,
+    currentSentenceIndex,
+    playingState,
   };
 };
 
