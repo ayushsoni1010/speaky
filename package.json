@@ -8,8 +8,7 @@
     "dev:server": "ts-node api/index.ts",
     "start": "npm run dev:server & npm run dev",
     "build": "tsc && vite build",
-    "preview": "vite preview",
-    "test": "vitest"
+    "preview": "vite preview"
   },
   "dependencies": {
     "cors": "^2.8.5",
