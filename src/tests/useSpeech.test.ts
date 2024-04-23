@@ -9,7 +9,7 @@ import {
   renderHook,
 } from '@testing-library/react';
 
-import { useSpeech } from '../lib/useSpeech';
+import { useSpeech } from '../hooks/useSpeech';
 
 describe("useSpeech Test Suite", () => {
   it("should return current sentence idx and current word range as well as playback state", () => {

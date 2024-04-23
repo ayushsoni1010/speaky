@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import "./App.css";
+import "./styles/global.css";
 
 import { Controls } from "./components/Controls";
 import { CurrentlyReading } from "./components/CurrentlyReading";
-import { useSpeech } from "./lib/useSpeech";
+import { useSpeech } from "./hooks/useSpeech";
 import { fetchContent, parseContentIntoSentences } from "./lib/content";
+import Header from "./components/Header";
+import { BrowserRouter } from "react-router-dom";
+import Hero from "./components/Hero";
 
 function App() {
   const [sentences, setSentences] = useState<Array<string>>([]);
@@ -26,19 +30,23 @@ function App() {
   }, []);
 
   return (
-    <div className="App">
-      <h1>Text to speech</h1>
-      <div>
-        <CurrentlyReading
-          sentences={sentences}
-          currentWordRange={currentWordIndex}
-          currentSentenceIdx={0}
-        />
+    <BrowserRouter>
+      <div className="h-screen max-w-screen-xl m-auto">
+        <Header />
+        <Hero />
+        {/* <h1>Text to speech</h1>
+        <div>
+          <CurrentlyReading
+            sentences={sentences}
+            currentWordRange={currentWordIndex}
+            currentSentenceIdx={0}
+          />
+        </div>
+        <div>
+          <Controls play={play} pause={pause} loadNewContent={getParseResult} />
+        </div> */}
       </div>
-      <div>
-        <Controls play={play} pause={pause} loadNewContent={getParseResult} />
-      </div>
-    </div>
+    </BrowserRouter>
   );
 }
 
