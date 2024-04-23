@@ -1,4 +1,4 @@
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  type?: string;
+  variant?: string;
 }

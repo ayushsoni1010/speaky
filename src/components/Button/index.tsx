@@ -2,7 +2,7 @@ import React from "react";
 import { ButtonProps } from "../../types/button";
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, type = "primary", ...props }, ref) => {
+  ({ className, variant = "primary", ...props }, ref) => {
     const variants: any = {
       primary: "gradient text-white",
       secondary: "",
@@ -11,7 +11,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     return (
       <button
-        className={`inline-flex items-center justify-center rounded-md text-base font-medium h-12 px-8 py-2 ${variants[type]} ${className}`}
+        className={`inline-flex items-center justify-center rounded-md text-base font-medium h-12 px-8 py-2 ${variants[variant]} ${className}`}
         ref={ref}
         {...props}
       ></button>
